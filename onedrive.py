@@ -77,7 +77,7 @@ class OneDrive:
 
     def delete_item(self, path):
         # Construct the URL for the item to delete
-        delete_url = f"{RESOURCE_URL}/me/drive/root:{path}"
+        delete_url = f"{RESOURCE_URL}/{path}"
 
         # Set up the request headers with the authorization token
         headers = {
