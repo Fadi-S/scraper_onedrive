@@ -74,3 +74,22 @@ class OneDrive:
             elif os.path.isdir(item_path):
                 subfolder = os.path.join(one_drive_folder, item_name)
                 self.upload_folder(item_path, subfolder)
+
+    def delete_item(self, path):
+        # Construct the URL for the item to delete
+        delete_url = f"{RESOURCE_URL}/me/drive/root:{path}"
+
+        # Set up the request headers with the authorization token
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        # Send the DELETE request to delete the item
+        response = httpx.delete(delete_url, headers=headers)
+
+        # Check if the deletion was successful
+        if response.status_code == 204:
+            return True
+        else:
+            print(f"Failed to delete item at path: {path}. Status code: {response.status_code}, Error: {response.text}")
+            return False
