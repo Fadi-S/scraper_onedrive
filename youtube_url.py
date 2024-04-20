@@ -2,13 +2,21 @@ from pytube import Playlist
 from pytube import YouTube
 from pydub import AudioSegment
 import os
+import ssl
+import uuid
+
+ssl._create_default_https_context = ssl._create_unverified_context
+
+data_path = "data/"
+trimmed_path = data_path + "trimmed/"
 
 
 def download_video(url):
     try:
+        filename = str(uuid.uuid4().hex)
         video = YouTube(url)
         stream = video.streams.filter(only_audio=True).first()
-        file_path = stream.download(filename=f"{video.title}.mp4")
+        file_path = stream.download(filename=f"{data_path + filename}.mp4")
         print(f"{video.title} is downloaded in WAV format")
         try:
             audio = AudioSegment.from_file(file_path, format="mp4")
@@ -22,8 +30,10 @@ def download_video(url):
         start_time = 3 * 60 * 1000  # Convert 3 minutes to milliseconds
         end_time = len(audio) - (3 * 60 * 1000)
         trimmed_audio = audio[start_time:end_time]
-        trimmed_file_path = f"{video.title}_trimmed.wav"
-        trimmed_audio.export("trimmed/"+trimmed_file_path, format="wav")
+        trimmed_file_path = f"{filename}_trimmed.wav"
+        if not os.path.exists(trimmed_path):
+            os.makedirs(trimmed_path)
+        trimmed_audio.export(trimmed_path + trimmed_file_path, format="wav")
         print(f"Trimmed audio saved as {trimmed_file_path}")
     except KeyError:
         print("Unable to fetch video information. Please check the video URL or your network connection.")
@@ -41,9 +51,7 @@ for url in playlist:
     # download_video(url)
 
 for i, url in enumerate(urls):
-    if i < 28:
-        continue
-    print(f"Downloading video {i+1} of {len(urls)}")
+    print(f"Downloading video {i + 1} of {len(urls)}")
     print(url)
     download_video(url)
     print("\n\n")
