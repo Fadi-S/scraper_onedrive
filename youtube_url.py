@@ -2,56 +2,94 @@ from pytube import Playlist
 from pytube import YouTube
 from pydub import AudioSegment
 import os
-import ssl
 import uuid
+import json
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.formatters import JSONFormatter
+from urllib.parse import urlparse, parse_qs
 
-ssl._create_default_https_context = ssl._create_unverified_context
+
+def video_id_from_url(value):
+    query = urlparse(value)
+    if query.hostname == 'youtu.be':
+        return query.path[1:]
+    if query.hostname in ('www.youtube.com', 'youtube.com'):
+        if query.path == '/watch':
+            p = parse_qs(query.query)
+            return p['v'][0]
+        if query.path[:7] == '/embed/':
+            return query.path.split('/')[2]
+        if query.path[:3] == '/v/':
+            return query.path.split('/')[2]
+    return None
+
 
 data_path = "data/"
-trimmed_path = data_path + "trimmed/"
+videos_path = data_path + "videos/"
+formatter = JSONFormatter()
+
+if not os.path.exists(videos_path):
+    os.makedirs(videos_path)
+
+urls = json.load(open("urls.json"))
+undownloaded = urls["undownloaded"]
+downloaded = urls["downloaded"]
 
 
-def download_video(url):
+def download_video(url, gender):
+    video_id = video_id_from_url(url)
+    print(f"Started downloading {video_id}")
+
+    filename = str(uuid.uuid4().hex)
+    path = data_path + "processed/" + filename
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    video = YouTube(url)
+    stream = video.streams.filter(only_audio=True).first()
     try:
-        filename = str(uuid.uuid4().hex)
-        video = YouTube(url)
-        stream = video.streams.filter(only_audio=True).first()
-        file_path = stream.download(filename=f"{data_path + filename}.mp4")
-        print(f"{video.title} is downloaded in WAV format")
-        try:
-            audio = AudioSegment.from_file(file_path, format="mp4")
-        except FileNotFoundError:
-            print("Error: File not found")
-            return
-        if len(audio) < 6 * 60 * 1000:
-            print("The audio is less than 6 minutes long.")
-            os.remove(file_path)
-            return
-        start_time = 3 * 60 * 1000  # Convert 3 minutes to milliseconds
-        end_time = len(audio) - (3 * 60 * 1000)
-        trimmed_audio = audio[start_time:end_time]
-        trimmed_file_path = f"{filename}_trimmed.wav"
-        if not os.path.exists(trimmed_path):
-            os.makedirs(trimmed_path)
-        trimmed_audio.export(trimmed_path + trimmed_file_path, format="wav")
-        print(f"Trimmed audio saved as {trimmed_file_path}")
-    except KeyError:
-        print("Unable to fetch video information. Please check the video URL or your network connection.")
+        file_path = stream.download(filename=f"{videos_path + filename}.mp4")
+    except Exception as e:
+        print(f"Error downloading {video_id}: {e}\n")
+        return
+    print(f"{video_id} is downloading")
+
+    audio = AudioSegment.from_file(file_path, format="mp4")
+    audio_path = f"{path}/audio.wav"
+    transcript_path = f"{path}/transcript.json"
+
+    audio.export(audio_path, format="wav")
+    print(f"Audio saved as {audio_path}")
+
+    transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['ar'])
+    json_formatted = formatter.format_transcript(transcript)
+
+    with open(transcript_path, 'w', encoding='utf-8') as json_file:
+        json.dump(json_formatted, json_file, ensure_ascii=False)
+    print(f"JSON file downloaded in {transcript_path}")
+
+    downloaded.append({
+        "id": video_id,
+        "path": filename,
+        "gender": gender
+    })
+    print(f"Done video {video_id}\n")
 
 
-URL_PLAYLIST = "https://www.youtube.com/playlist?list=PLRCzrSHS5u_HI0wKuSGdDEmiUQEfrTFZM"
+try:
+    for url in undownloaded:
+        link = url["link"]
+        if url["playlist"]:
+            playlist = Playlist(link)
+            for video_link in playlist:
+                download_video(video_link, url["gender"])
+        else:
+            download_video(link, url["gender"])
+        undownloaded.remove(url)
+finally:
+    with open("urls.json", "w") as file:
+        json.dump({
+            "downloaded": downloaded,
+            "undownloaded": undownloaded,
+        }, file, indent=1)
 
-# Retrieve URLs of videos from playlist
-playlist = Playlist(URL_PLAYLIST)
-print('Number Of Videos In playlist: %s' % len(playlist.video_urls))
-
-urls = []
-for url in playlist:
-    urls.append(url)
-    # download_video(url)
-
-for i, url in enumerate(urls):
-    print(f"Downloading video {i + 1} of {len(urls)}")
-    print(url)
-    download_video(url)
-    print("\n\n")

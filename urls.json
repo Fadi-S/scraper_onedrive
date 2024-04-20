@@ -1,0 +1,20 @@
+{
+  "downloaded": [],
+  "undownloaded": [
+    {
+      "link": "https://www.youtube.com/watch?v=Atx8H_b-cbU&list=PLSSxr3Rf2_X08SJxnv0bvsz-L1GjzNlIO",
+      "playlist": true,
+      "gender": "male"
+    },
+    {
+      "link": "https://www.youtube.com/playlist?list=PLouONaMCAAv80EGnbe6X41AhkMPgKsQnP",
+      "playlist": true,
+      "gender": "female"
+    },
+    {
+      "link": "https://www.youtube.com/playlist?list=PLRCzrSHS5u_HI0wKuSGdDEmiUQEfrTFZM",
+      "playlist": true,
+      "gender": "male"
+    }
+  ]
+}
