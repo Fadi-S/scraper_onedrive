@@ -3,38 +3,41 @@ from azure.identity import InteractiveBrowserCredential
 from msgraph import GraphServiceClient
 import webbrowser
 import httpx
+import json
+import time
 
-tenant_id = "eaf624c8-a0c4-4195-87d2-443e5d7516cd"
-client_id = "2ea0db6a-7212-4998-8f0e-e2fab4ad1ecd"
+keys = json.load(open("keys.json"))
+tenant_id = keys["tenant"]
+client_id = keys["client"]
 
 AUTHORITY_URL = 'https://login.microsoftonline.com/{}'.format(tenant_id)
-RESOURCE_URL = 'https://graph.microsoft.com/v1.0/me/drive/root'
-redirect_uri = "http://localhost:8080/auth/callback"
 API_VERSION = 'v1.0'
+RESOURCE_URL = f'https://graph.microsoft.com/{API_VERSION}'
+redirect_uri = "http://localhost:8080/auth/callback"
 scopes = ['Files.ReadWrite.All']
-auth = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize?client_id={client_id}&response_type=code&scope={'%20'.join(scopes)}"
-# webbrowser.open(auth)
+request_auth_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize?client_id={client_id}&response_type=code&scope={'%20'.join(scopes)}"
+# webbrowser.open(request_auth_url)
 
-credential = InteractiveBrowserCredential(client_id=client_id, tenant_id=tenant_id, redirect_uri=redirect_uri)
-access_token = credential.get_token(' '.join(scopes))
+try:
+    token = json.load(open("access_token.json"))
+    if token["expires_on"] < time.time():
+        raise Exception("Token expired")
+    access_token = token["token"]
+except:
+    credential = InteractiveBrowserCredential(client_id=client_id, tenant_id=tenant_id, redirect_uri=redirect_uri)
+    access_token = credential.get_token(' '.join(scopes))
+    with open("access_token.json", "w") as f:
+        f.write(json.dumps({"token": access_token.token, "expires_on": access_token.expires_on}))
+    access_token = access_token.token
 
-print(access_token)
 
 async def main():
-    headers = {"Authorization": f"Bearer {access_token.token}"}
+    headers = {"Authorization": f"Bearer {access_token}"}
 
     async with httpx.AsyncClient(headers=headers) as http_client:
-        folder_name = "NewFolder"
-        payload = {
-            "name": folder_name,
-            "folder": {}
-        }
-        response = await http_client.post(f"{RESOURCE_URL}:/deep_learning", json=payload)
+        response = await http_client.get(f"{RESOURCE_URL}/me/drive/root:/deep_learning")
 
-        if response.status_code == 201:
-            print(f"Folder '{folder_name}' created successfully in OneDrive.")
-        else:
-            print(f"Failed to create folder in OneDrive. Status code: {response.status_code}, Error: {response.json()}")
+        print(response.json())
 
 
 asyncio.run(main())
