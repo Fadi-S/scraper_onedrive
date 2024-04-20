@@ -25,11 +25,7 @@ def video_id_from_url(value):
 
 
 data_path = "data/"
-videos_path = data_path + "videos/"
 formatter = JSONFormatter()
-
-if not os.path.exists(videos_path):
-    os.makedirs(videos_path)
 
 urls = json.load(open("urls.json"))
 undownloaded = urls["undownloaded"]
@@ -57,24 +53,15 @@ def download_video(url, gender):
 
     video = YouTube(url)
     stream = video.streams.filter(only_audio=True).first()
+    audio_path = f"{path}/audio.mp3"
     try:
-        file_path = stream.download(filename=f"{videos_path + filename}.mp4")
+        stream.download(filename=audio_path)
     except Exception as e:
         print(f"Error downloading {video_id}: {e}\n")
         return
-    print(f"{video_id} downloaded")
+    print(f"{video_id} downloaded as mp3")
 
-    audio = AudioSegment.from_file(file_path, format="mp4")
-    audio_path = f"{path}/audio.aac"
     transcript_path = f"{path}/transcript.json"
-
-    bitrate = "64k"
-    sample_rate = 44100
-    compression = "pcm_s16le"  # PCM compression for lossless quality
-
-    audio.export(audio_path, format="aac", bitrate=bitrate,
-                 parameters=["-ar", str(sample_rate), "-ac", "1", "-acodec", compression])
-    print(f"Audio saved as {audio_path}")
 
     transcript_object = decoder.decode(formatter.format_transcript(transcript))
 
