@@ -68,7 +68,12 @@ def download_video(url, gender):
     audio_path = f"{path}/audio.wav"
     transcript_path = f"{path}/transcript.json"
 
-    audio.export(audio_path, format="wav")
+    bitrate = "64k"
+    sample_rate = 44100
+    compression = "pcm_s16le"  # PCM compression for lossless quality
+
+    audio.export(audio_path, format="wav", bitrate=bitrate,
+                 parameters=["-ar", str(sample_rate), "-ac", "1", "-acodec", compression])
     print(f"Audio saved as {audio_path}")
 
     transcript_object = decoder.decode(formatter.format_transcript(transcript))
