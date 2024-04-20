@@ -1,7 +1,5 @@
 import asyncio
 from azure.identity import InteractiveBrowserCredential
-from msgraph import GraphServiceClient
-import webbrowser
 import httpx
 import json
 import time
@@ -15,8 +13,6 @@ API_VERSION = 'v1.0'
 RESOURCE_URL = f'https://graph.microsoft.com/{API_VERSION}'
 redirect_uri = "http://localhost:8080/auth/callback"
 scopes = ['Files.ReadWrite.All']
-request_auth_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize?client_id={client_id}&response_type=code&scope={'%20'.join(scopes)}"
-# webbrowser.open(request_auth_url)
 
 try:
     token = json.load(open("access_token.json"))
