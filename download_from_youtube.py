@@ -35,6 +35,8 @@ urls = json.load(open("urls.json"))
 undownloaded = urls["undownloaded"]
 downloaded = urls["downloaded"]
 
+decoder = json.decoder.JSONDecoder()
+
 
 def download_video(url, gender):
     video_id = video_id_from_url(url)
@@ -69,11 +71,11 @@ def download_video(url, gender):
     audio.export(audio_path, format="wav")
     print(f"Audio saved as {audio_path}")
 
-    json_formatted = formatter.format_transcript(transcript)
+    transcript_object = decoder.decode(formatter.format_transcript(transcript))
 
-    with open(transcript_path, 'w', encoding='utf-8') as json_file:
-        json.dump(json_formatted, json_file, ensure_ascii=False)
-    print(f"JSON file downloaded in {transcript_path}")
+    with open(transcript_path, 'w') as json_file:
+        json.dump(transcript_object, json_file, ensure_ascii=False)
+    print(f"Transcript file downloaded in {transcript_path}")
 
     downloaded[video_id] = {
         "id": video_id,
