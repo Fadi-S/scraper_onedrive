@@ -1,6 +1,5 @@
 from pytube import Playlist
 from pytube import YouTube
-from pydub import AudioSegment
 import os
 import uuid
 import json
@@ -47,7 +46,7 @@ def download_video(url, gender):
     print(f"Started downloading {video_id}")
 
     filename = str(uuid.uuid4().hex)
-    path = data_path + "processed/" + filename
+    path = f"{data_path}{gender}/{filename}"
     if not os.path.exists(path):
         os.makedirs(path)
 
