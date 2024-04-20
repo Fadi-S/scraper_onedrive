@@ -1,5 +1,6 @@
 import httpx
-
+import os
+from tqdm import tqdm
 RESOURCE_URL = f'https://graph.microsoft.com/v1.0'
 
 
@@ -54,3 +55,22 @@ class OneDrive:
         else:
             print(f"Failed to list files. Status code: {response.status_code}, Error: {response.text}")
             return None
+
+    def upload_folder(self, folder_path, one_drive_folder):
+        # List all files and directories in the local folder
+        items = os.listdir(folder_path)
+
+        # Upload each item in the folder
+        for item in tqdm(items):
+            item_path = os.path.join(folder_path, item)
+            item_name = os.path.basename(item_path)
+
+            # If the item is a file, upload it to OneDrive
+            if os.path.isfile(item_path):
+                if not self.upload_file(item_path, one_drive_folder, item_name):
+                    print(f"Failed to upload file: {item_name}")
+
+            # If the item is a directory, recursively upload its contents
+            elif os.path.isdir(item_path):
+                subfolder = os.path.join(one_drive_folder, item_name)
+                self.upload_folder(item_path, subfolder)
