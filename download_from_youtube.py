@@ -38,6 +38,14 @@ downloaded = urls["downloaded"]
 
 def download_video(url, gender):
     video_id = video_id_from_url(url)
+    if video_id in downloaded:
+        return
+
+    try:
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['ar'])
+    except:
+        return
+
     print(f"Started downloading {video_id}")
 
     filename = str(uuid.uuid4().hex)
@@ -52,7 +60,7 @@ def download_video(url, gender):
     except Exception as e:
         print(f"Error downloading {video_id}: {e}\n")
         return
-    print(f"{video_id} is downloading")
+    print(f"{video_id} downloaded")
 
     audio = AudioSegment.from_file(file_path, format="mp4")
     audio_path = f"{path}/audio.wav"
@@ -61,18 +69,17 @@ def download_video(url, gender):
     audio.export(audio_path, format="wav")
     print(f"Audio saved as {audio_path}")
 
-    transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['ar'])
     json_formatted = formatter.format_transcript(transcript)
 
     with open(transcript_path, 'w', encoding='utf-8') as json_file:
         json.dump(json_formatted, json_file, ensure_ascii=False)
     print(f"JSON file downloaded in {transcript_path}")
 
-    downloaded.append({
+    downloaded[video_id] = {
         "id": video_id,
         "path": filename,
         "gender": gender
-    })
+    }
     print(f"Done video {video_id}\n")
 
 
