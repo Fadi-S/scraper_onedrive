@@ -65,14 +65,14 @@ def download_video(url, gender):
     print(f"{video_id} downloaded")
 
     audio = AudioSegment.from_file(file_path, format="mp4")
-    audio_path = f"{path}/audio.wav"
+    audio_path = f"{path}/audio.aac"
     transcript_path = f"{path}/transcript.json"
 
     bitrate = "64k"
     sample_rate = 44100
     compression = "pcm_s16le"  # PCM compression for lossless quality
 
-    audio.export(audio_path, format="wav", bitrate=bitrate,
+    audio.export(audio_path, format="aac", bitrate=bitrate,
                  parameters=["-ar", str(sample_rate), "-ac", "1", "-acodec", compression])
     print(f"Audio saved as {audio_path}")
 
