@@ -1,34 +1,23 @@
 import asyncio
-from azure.identity import InteractiveBrowserCredential
 import httpx
-import json
-import time
+from get_token import get_token
+from helpers import upload_file_to_onedrive, RESOURCE_URL
 
-keys = json.load(open("keys.json"))
-tenant_id = keys["tenant"]
-client_id = keys["client"]
+token = get_token()
 
-AUTHORITY_URL = 'https://login.microsoftonline.com/{}'.format(tenant_id)
-API_VERSION = 'v1.0'
-RESOURCE_URL = f'https://graph.microsoft.com/{API_VERSION}'
-redirect_uri = "http://localhost:8080/auth/callback"
-scopes = ['Files.ReadWrite.All']
+success = upload_file_to_onedrive(
+    token,
+    "keys_example.json",
+    "me/drive/root:/deep_learning",
+    "keys_example.json"
+)
 
-try:
-    token = json.load(open("access_token.json"))
-    if token["expires_on"] < time.time():
-        raise Exception("Token expired")
-    access_token = token["token"]
-except:
-    credential = InteractiveBrowserCredential(client_id=client_id, tenant_id=tenant_id, redirect_uri=redirect_uri)
-    access_token = credential.get_token(' '.join(scopes))
-    with open("access_token.json", "w") as f:
-        f.write(json.dumps({"token": access_token.token, "expires_on": access_token.expires_on}))
-    access_token = access_token.token
+if success:
+    print("File uploaded successfully")
 
 
 async def main():
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = {"Authorization": f"Bearer {token}"}
 
     async with httpx.AsyncClient(headers=headers) as http_client:
         response = await http_client.get(f"{RESOURCE_URL}/me/drive/root:/deep_learning")
