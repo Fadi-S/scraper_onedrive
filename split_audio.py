@@ -21,7 +21,7 @@ try:
     for gender in ["male", "female"]:
         folders = os.listdir(f"data/{gender}")
 
-        for folder in folders:
+        for folder in tqdm(folders):
             if folder in done:
                 continue
             path = f"data/{gender}/{folder}"
@@ -29,22 +29,21 @@ try:
             transcript_path = f"{path}/transcript.json"
 
             transcript = json.load(open(transcript_path, "r"))
-            for line in transcript:
+            audio = AudioSegment.from_file(audio_path)
+            for line in tqdm(transcript):
                 start = line["start"]
                 end = start + line["duration"]
                 # Split audio with python
-                audio = AudioSegment.from_file(audio_path)
-                audio = audio[start * 1000:end * 1000]
+                split_audio = audio[start * 1000:end * 1000]
                 new_path = f"{export_path}/{index}.mp3"
-                audio.export(new_path, format="mp3")
+                split_audio.export(new_path, format="mp3")
 
                 data.append({
                     "audio": new_path,
                     "text": line["text"],
                     "gender": gender,
                 })
-                index += 1
-                tqdm.write(f"Done audio {index} ({gender})")
+            index += 1
             done.append(folder)
 finally:
     file_path = f'{export_path}/index.csv'
