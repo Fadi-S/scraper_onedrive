@@ -6,13 +6,14 @@ import csv
 data = []
 
 export_path = "data/splitted_audio"
+os.makedirs(export_path, exist_ok=True)
 
 done = []
 try:
     with open("data/done.json", "r") as file:
         done = json.load(file)
 except FileNotFoundError:
-    print("File 'done.json' not found. Using default value.")
+    pass
 
 index = 1
 try:
