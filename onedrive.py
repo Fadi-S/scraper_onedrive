@@ -31,8 +31,8 @@ class OneDrive:
             "Authorization": f"Bearer {self.token}"
         }
 
-        download_url = f"{RESOURCE_URL}/{one_drive_file}:/content"
-        response = httpx.get(download_url, headers=headers)
+        download_url = f"{RESOURCE_URL}/{one_drive_file}"
+        response = httpx.get(download_url, headers=headers, follow_redirects=True)
 
         if response.status_code == 200:
             with open(file_path, "wb") as file:
@@ -41,6 +41,34 @@ class OneDrive:
         else:
             print(f"Failed to download file. Status code: {response.status_code}, Error: {response.text}")
             return False
+
+    def download_folder(self, local_folder_path, one_drive_folder):
+        # Create the local folder if it doesn't exist
+        os.makedirs(local_folder_path, exist_ok=True)
+
+        # List files and folders in the OneDrive folder
+        items = self.list_files(one_drive_folder)
+
+        if items is None:
+            print(f"Failed to list files in folder: {one_drive_folder}")
+            return
+
+        # Download each item in the folder
+        for item in tqdm(items.get('value', [])):
+            item_name = item['name']
+            item_type = 'folder' if 'folder' in item else 'file'
+
+            # If the item is a file, download it
+            if item_type == 'file':
+                item_id = item['id']
+                local_file_path = os.path.join(local_folder_path, item_name)
+                self.download_file(local_file_path, f"me/drive/items/{item_id}/content")
+
+            # If the item is a folder, recursively download its contents
+            elif item_type == 'folder':
+                subfolder_name = item_name
+                subfolder_path = os.path.join(local_folder_path, subfolder_name)
+                self.download_folder(subfolder_path, f"{one_drive_folder}/{subfolder_name}")
 
     def list_files(self, one_drive_folder):
         headers = {
