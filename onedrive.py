@@ -76,13 +76,20 @@ class OneDrive:
         }
 
         list_url = f"{RESOURCE_URL}/{one_drive_folder}:/children"
-        response = httpx.get(list_url, headers=headers)
+        all_items = []
 
-        if response.status_code == 200:
-            return response.json()
-        else:
-            print(f"Failed to list files. Status code: {response.status_code}, Error: {response.text}")
-            return None
+        while list_url:
+            response = httpx.get(list_url, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                items = data.get('value', [])
+                all_items.extend(items)
+                list_url = data.get('@odata.nextLink')
+            else:
+                print(f"Failed to list files. Status code: {response.status_code}, Error: {response.text}")
+                return None
+
+        return all_items
 
     def upload_folder(self, folder_path, one_drive_folder):
         # List all files and directories in the local folder
