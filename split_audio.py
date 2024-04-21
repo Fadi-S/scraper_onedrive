@@ -1,6 +1,7 @@
 import os
 import json
 from pydub import AudioSegment
+import csv
 
 data = []
 
@@ -38,5 +39,15 @@ try:
                 index += 1
             done.append(folder)
 finally:
+    file_path = f'{export_path}/index.csv'
+    file_exists = os.path.isfile(file_path)
+    with open(file_path, 'a' if file_exists else 'w', newline='') as file:
+        writer = csv.writer(file)
+
+        if not file_exists:
+            writer.writerow(['Audio', 'Text', 'Gender'])
+
+        writer.writerows(data)
+
     with open("data/done.json", "w") as f:
-        json.dump(data, f, indent=1)
+        json.dump(done, f, indent=1)
