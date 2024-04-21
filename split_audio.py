@@ -7,7 +7,12 @@ data = []
 
 export_path = "data/splitted_audio"
 
-done = json.load(open("data/done.json", "r"))
+done = []
+try:
+    with open("data/done.json", "r") as file:
+        done = json.load(file)
+except FileNotFoundError:
+    print("File 'done.json' not found. Using default value.")
 
 index = 1
 try:
