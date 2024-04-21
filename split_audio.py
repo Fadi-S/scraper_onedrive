@@ -2,6 +2,7 @@ import os
 import json
 from pydub import AudioSegment
 import csv
+from tqdm import tqdm
 
 data = []
 
@@ -43,6 +44,7 @@ try:
                     "gender": gender,
                 })
                 index += 1
+                tqdm.write(f"Done audio {index} ({gender})")
             done.append(folder)
 finally:
     file_path = f'{export_path}/index.csv'
