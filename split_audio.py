@@ -16,7 +16,7 @@ try:
 except FileNotFoundError:
     pass
 
-index = 1
+index = 706
 try:
     for gender in ["male", "female"]:
         folders = os.listdir(f"data/{gender}")
@@ -43,7 +43,7 @@ try:
                     "text": line["text"],
                     "gender": gender,
                 })
-            index += 1
+                index += 1
             done.append(folder)
 finally:
     file_path = f'{export_path}/index.csv'
