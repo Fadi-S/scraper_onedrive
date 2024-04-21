@@ -54,7 +54,7 @@ class OneDrive:
             return
 
         # Download each item in the folder
-        for item in tqdm(items.get('value', [])):
+        for item in tqdm(items):
             item_name = item['name']
             item_type = 'folder' if 'folder' in item else 'file'
 
