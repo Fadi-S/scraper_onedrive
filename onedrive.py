@@ -91,28 +91,67 @@ class OneDrive:
 
         return all_items
 
-    def upload_folder(self, folder_path, one_drive_folder, skip=None):
+    @staticmethod
+    def _list_all_files(source_path):
+        file_list = []
+
+        if os.path.isfile(source_path):
+            file_list.append(source_path)
+        elif os.path.isdir(source_path):
+            # If source_path is a directory, recursively list all files inside
+            for root, _, files in os.walk(source_path):
+                for file_name in files:
+                    # Construct relative path of the file
+                    relative_path = os.path.relpath(os.path.join(root, file_name).__str__(), source_path)
+                    file_list.append(relative_path)
+
+        return file_list
+
+    def upload_folder(self, folder_path, one_drive_folder, skip=None, batch_size=200):
         if skip is None:
             skip = []
         # List all files and directories in the local folder
-        items = os.listdir(folder_path)
+        items = self._list_all_files(folder_path)
+        headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json"
+        }
 
+        count = 0
+        batch_requests = []
         # Upload each item in the folder
-        for item in tqdm(items):
-            item_path = os.path.join(folder_path, item)
+        for item_path in tqdm(items):
             item_name = os.path.basename(item_path)
             if item_path in skip:
                 continue
 
-            # If the item is a file, upload it to OneDrive
-            if os.path.isfile(item_path):
-                if not self.upload_file(item_path, one_drive_folder, item_name):
-                    print(f"Failed to upload file: {item_name}")
+            with open(item_path, "rb") as file:
+                file_content = file.read()
 
-            # If the item is a directory, recursively upload its contents
-            elif os.path.isdir(item_path):
-                subfolder = os.path.join(one_drive_folder, item_name)
-                self.upload_folder(item_path, subfolder)
+            batch_requests.append({
+                "id": str(count),
+                "method": "PUT",
+                "url": f"{one_drive_folder}/{item_name}:/content",
+                "headers": {
+                    "Content-Type": "application/octet-stream"
+                },
+                "body": file_content
+            })
+
+            count += 1
+            if count % batch_size == 0:
+                batch_payload = {
+                    "requests": batch_requests
+                }
+                response = httpx.post(RESOURCE_URL + "/$batch", headers=headers, json=batch_payload)
+
+                if response.status_code == 200:
+                    pass
+                else:
+                    print(
+                        f"Failed to execute batch request. Status code: {response.status_code}, Error: {response.text}")
+
+                batch_requests = []
 
     def delete_item(self, path):
         # Construct the URL for the item to delete
