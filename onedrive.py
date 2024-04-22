@@ -148,7 +148,7 @@ class OneDrive:
                 batch_payload = {
                     "requests": batch_requests
                 }
-                response = httpx.post(RESOURCE_URL + "/$batch", headers=headers, json=batch_payload)
+                response = httpx.post(RESOURCE_URL + "/$batch", headers=headers, json=batch_payload, timeout=120)
 
                 if response.status_code == 200:
                     pass
