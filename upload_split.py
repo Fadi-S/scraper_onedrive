@@ -3,6 +3,7 @@ from onedrive import OneDrive
 from multiprocessing import Process, Queue
 import os
 
+
 def timeout(seconds, action=None):
     """Calls any function with timeout after 'seconds'.
        If a timeout occurs, 'action' will be returned or called if
@@ -45,6 +46,7 @@ timeout(3600, update_token)
 
 uploaded = onedrive.list_files("me/drive/root:/deep_learning/data/splitted_audio")
 uploaded_files = [os.path.join("data/splitted_audio/", file['name']) for file in uploaded]
+print("Uploaded files:", uploaded_files)
 
 success = onedrive.upload_folder(
     "data/splitted_audio",
