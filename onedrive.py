@@ -2,6 +2,7 @@ import httpx
 import os
 from tqdm import tqdm
 import base64
+from time import sleep
 
 RESOURCE_URL = f'https://graph.microsoft.com/v1.0'
 
@@ -81,6 +82,7 @@ class OneDrive:
         all_items = []
 
         while list_url:
+            sleep(1)
             response = httpx.get(list_url, headers=headers)
             if response.status_code == 200:
                 data = response.json()
