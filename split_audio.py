@@ -24,20 +24,21 @@ def process_folder(gender, folder, export_path, done):
 
     data = []
 
-    for line in tqdm(transcript):
-        start = line["start"]
-        end = start + line["duration"]
-        # Split audio with python
-        split_audio = audio[start * 1000:end * 1000]
+    with tqdm(transcript, desc=f"Processing folder '{folder}'") as pbar:
+        for line in pbar:
+            start = line["start"]
+            end = start + line["duration"]
+            # Split audio with python
+            split_audio = audio[start * 1000:end * 1000]
 
-        # Use the lock to synchronize access to the index variable
-        with index_lock:
-            new_path = f"{export_path}/{index}.mp3"
-            index += 1
+            # Use the lock to synchronize access to the index variable
+            with index_lock:
+                new_path = f"{export_path}/{index}.mp3"
+                index += 1
 
-        split_audio.export(new_path, format="mp3")
+            split_audio.export(new_path, format="mp3")
 
-        data.append([new_path, line["text"], gender])
+            data.append([new_path, line["text"], gender])
 
     with open(f'{export_path}/index.csv', 'a', newline='') as file:
         writer = csv.writer(file)
