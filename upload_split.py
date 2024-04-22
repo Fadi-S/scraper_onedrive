@@ -1,7 +1,7 @@
 from get_token import get_token
 from onedrive import OneDrive
 from multiprocessing import Process, Queue
-
+import os
 
 def timeout(seconds, action=None):
     """Calls any function with timeout after 'seconds'.
@@ -43,9 +43,13 @@ def update_token():
 
 timeout(3600, update_token)
 
+uploaded = onedrive.list_files("me/drive/root:/deep_learning/data/splitted_audio")
+uploaded_files = [os.path.join("data/splitted_audio/", file['name']) for file in uploaded]
+
 success = onedrive.upload_folder(
     "data/splitted_audio",
-    "me/drive/root:/deep_learning/data/splitted_audio"
+    "me/drive/root:/deep_learning/data/splitted_audio",
+    skip=uploaded_files
 )
 
 print("Uploaded folder successfully")

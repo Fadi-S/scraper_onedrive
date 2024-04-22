@@ -91,7 +91,9 @@ class OneDrive:
 
         return all_items
 
-    def upload_folder(self, folder_path, one_drive_folder):
+    def upload_folder(self, folder_path, one_drive_folder, skip=None):
+        if skip is None:
+            skip = []
         # List all files and directories in the local folder
         items = os.listdir(folder_path)
 
@@ -99,6 +101,8 @@ class OneDrive:
         for item in tqdm(items):
             item_path = os.path.join(folder_path, item)
             item_name = os.path.basename(item_path)
+            if item_path in skip:
+                continue
 
             # If the item is a file, upload it to OneDrive
             if os.path.isfile(item_path):
