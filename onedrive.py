@@ -1,6 +1,8 @@
 import httpx
 import os
 from tqdm import tqdm
+import base64
+
 RESOURCE_URL = f'https://graph.microsoft.com/v1.0'
 
 
@@ -127,7 +129,7 @@ class OneDrive:
                 continue
 
             with open(item_path, "rb") as file:
-                file_content = file.read()
+                file_content = base64.b64encode(file.read()).decode('utf-8')
 
             batch_requests.append({
                 "id": str(count),
