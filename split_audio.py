@@ -15,6 +15,7 @@ except FileNotFoundError:
     pass
 
 index = 1
+index_path = f'{export_path}/index.csv'
 for gender in ["male", "female"]:
     folders = os.listdir(f"data/{gender}")
 
@@ -40,9 +41,7 @@ for gender in ["male", "female"]:
             data.append([new_path, line["text"], gender])
             index += 1
 
-        file_path = f'{export_path}/index.csv'
-        file_exists = os.path.isfile(file_path)
-        with open(file_path, 'a' if file_exists else 'w', newline='') as file:
+        with open(index_path, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(data)
         done.append(folder)
