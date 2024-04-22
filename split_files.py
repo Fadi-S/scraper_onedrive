@@ -1,6 +1,17 @@
-import os
 import json
-from distutils.dir_util import copy_tree
+import os
+import shutil
+
+
+def copytree(src, dst):
+    if os.path.isfile(src):
+        shutil.copy2(src, dst)
+    else:
+        files = os.listdir(src)
+        os.makedirs(dst, exist_ok=True)
+        for file in files:
+            copytree(os.path.join(src, file), os.path.join(dst, file).__str__())
+
 
 done = json.load(open("data/done.json"))
 all_male = os.listdir("data/male")
@@ -34,7 +45,7 @@ for i in range(len(remaining_male)):
     servers[i % server_count]["male"].append(remaining_male[i])
 
 for i in range(len(remaining_female)):
-    servers[i % server_count]["male"].append(remaining_female[i])
+    servers[i % server_count]["female"].append(remaining_female[i])
 
 
 from_path = "data"
@@ -43,8 +54,12 @@ os.makedirs(to_path, exist_ok=True)
 
 for i in range(server_count):
     for path in servers[i]["male"]:
-        copy_tree(os.path.join(from_path, "male", path), os.path.join(to_path, "male", path))
+        dest = os.path.join(to_path, str(i + 1), "male", path)
+        os.makedirs(dest, exist_ok=True)
+        copytree(os.path.join(from_path, "male", path), dest)
 
     for path in servers[i]["female"]:
-        copy_tree(os.path.join(from_path, "female", path), os.path.join(to_path, "female", path))
+        dest = os.path.join(to_path, str(i + 1), "female", path)
+        os.makedirs(dest, exist_ok=True)
+        copytree(os.path.join(from_path, "female", path), dest)
 
