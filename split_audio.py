@@ -25,7 +25,6 @@ try:
 except FileNotFoundError:
     pass
 
-index = 1
 index_path = f'{export_path}/index.csv'
 for gender in ["male", "female"]:
     folders = os.listdir(f"data/{gender}")
@@ -41,8 +40,9 @@ for gender in ["male", "female"]:
         audio = AudioSegment.from_file(audio_path)
         data = []
 
+        index = 1
         for line in tqdm(transcript):
-            filename = generate_random_string()
+            filename = generate_random_string() + f"_{index}"
             start = line["start"]
             end = start + line["duration"]
             # Split audio with python
@@ -51,6 +51,7 @@ for gender in ["male", "female"]:
             split_audio.export(new_path, format="mp3")
 
             data.append([f"{filename}.mp3", line["text"], gender])
+            index += 1
 
         with open(index_path, 'a', newline='') as file:
             writer = csv.writer(file)
