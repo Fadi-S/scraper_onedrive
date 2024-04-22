@@ -16,7 +16,7 @@ try:
 except FileNotFoundError:
     pass
 
-index = 706
+index = 1
 try:
     for gender in ["male", "female"]:
         folders = os.listdir(f"data/{gender}")
@@ -38,11 +38,7 @@ try:
                 new_path = f"{export_path}/{index}.mp3"
                 split_audio.export(new_path, format="mp3")
 
-                data.append({
-                    "audio": new_path,
-                    "text": line["text"],
-                    "gender": gender,
-                })
+                data.append([new_path, line["text"], gender])
                 index += 1
             done.append(folder)
 finally:
