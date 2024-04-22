@@ -111,7 +111,7 @@ class OneDrive:
 
         return file_list
 
-    def upload_folder(self, folder_path, one_drive_folder, skip=None, batch_size=50):
+    def upload_folder(self, folder_path, one_drive_folder, skip=None, batch_size=20):
         if skip is None:
             skip = []
         # List all files and directories in the local folder
