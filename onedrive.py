@@ -120,7 +120,8 @@ class OneDrive:
         count = 0
         batch_requests = []
         # Upload each item in the folder
-        for item_path in tqdm(items):
+        for item in tqdm(items):
+            item_path = os.path.join(folder_path, item)
             item_name = os.path.basename(item_path)
             if item_path in skip:
                 continue
