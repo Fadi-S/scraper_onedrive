@@ -21,7 +21,7 @@ class OneDrive:
             file_content = file.read()
 
         upload_url = f"{RESOURCE_URL}/{one_drive_folder}/{file_name}:/content"
-        response = httpx.put(upload_url, headers=headers, data=file_content)
+        response = httpx.put(upload_url, headers=headers, data=file_content, timeout=120)
 
         if response.status_code == 201:
             return True
