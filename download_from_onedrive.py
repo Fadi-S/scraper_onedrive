@@ -5,8 +5,8 @@ token = get_token()
 onedrive = OneDrive(token)
 
 success = onedrive.download_folder(
-    "data",
-    "me/drive/root:/deep_learning/data/Original"
+    "data/male",
+    "me/drive/root:/deep_learning/data/Original/male"
 )
 
 print("Folder downloaded successfully")

@@ -35,7 +35,7 @@ class OneDrive:
         }
 
         download_url = f"{RESOURCE_URL}/{one_drive_file}"
-        response = httpx.get(download_url, headers=headers, follow_redirects=True)
+        response = httpx.get(download_url, headers=headers, follow_redirects=True, timeout=360)
 
         if response.status_code == 200:
             with open(file_path, "wb") as file:
@@ -65,7 +65,8 @@ class OneDrive:
             if item_type == 'file':
                 item_id = item['id']
                 local_file_path = os.path.join(local_folder_path, item_name)
-                self.download_file(local_file_path, f"me/drive/items/{item_id}/content")
+                if not os.path.exists(local_file_path):
+                    self.download_file(local_file_path, f"me/drive/items/{item_id}/content")
 
             # If the item is a folder, recursively download its contents
             elif item_type == 'folder':
