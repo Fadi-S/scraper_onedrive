@@ -20,7 +20,8 @@ stacked_samples = pd.concat([female, male], axis=0)
 
 # Create folder for random samples
 os.makedirs('data/random_samples', exist_ok=True)
-stacked_samples.to_csv('data/random_samples.csv', index=False)
+stacked_samples.to_csv('data/random_samples.csv', index=False, columns=index.columns)
+print(stacked_samples.columns)
 
 # Copy files to random_samples folder
 for filename in tqdm(stacked_samples['file_name']):
