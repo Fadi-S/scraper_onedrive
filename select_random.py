@@ -6,7 +6,7 @@ import pandas as pd
 index = pd.read_csv('data/index.csv')
 
 # Select 60,000 random samples
-random_samples = random.sample(range(len(index)), 60000)
+random_samples = random.sample(range(len(index)), 70_000)
 
 # Save random samples to a new csv file
 index.iloc[random_samples].to_csv('data/random_samples.csv', index=False)
