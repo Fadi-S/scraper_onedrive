@@ -24,7 +24,7 @@ stacked_samples.to_csv('data/random_samples.csv', index=False, columns=index.col
 print(stacked_samples.columns)
 
 # Copy files to random_samples folder
-for filename in tqdm(stacked_samples['file_name']):
+for filename in tqdm(stacked_samples['audio_file']):
     shutil.copy(f'data/audios/{filename}', f'data/random_samples/{filename}')
 
 print("Random samples copied to 'data/random_samples' folder.")
